@@ -170,35 +170,17 @@ void ShellFileSelectHelper::RunFileChooserEnd() {
   Release();
 }
 
-void ShellFileSelectHelper::FileSelected(const base::FilePath& path,
-                                         int index,
-                                         void* params) {
-  FileSelectedWithExtraInfo(ui::SelectedFileInfo(path, path), index, params);
-}
-
-void ShellFileSelectHelper::FileSelectedWithExtraInfo(
-    const ui::SelectedFileInfo& file,
-    int index,
-    void* params) {
+void ShellFileSelectHelper::FileSelected(const ui::SelectedFileInfo& file,
+                                         int index) {
   ConvertToFileChooserFileInfoList({file});
 }
 
 void ShellFileSelectHelper::MultiFilesSelected(
-    const std::vector<base::FilePath>& files,
-    void* params) {
-  std::vector<ui::SelectedFileInfo> selected_files =
-      ui::FilePathListToSelectedFileInfoList(files);
-
-  MultiFilesSelectedWithExtraInfo(selected_files, params);
-}
-
-void ShellFileSelectHelper::MultiFilesSelectedWithExtraInfo(
-    const std::vector<ui::SelectedFileInfo>& files,
-    void* params) {
+    const std::vector<ui::SelectedFileInfo>& files) {
   ConvertToFileChooserFileInfoList(files);
 }
 
-void ShellFileSelectHelper::FileSelectionCanceled(void* params) {
+void ShellFileSelectHelper::FileSelectionCanceled() {
   RunFileChooserEnd();
 }
 
@@ -213,8 +195,8 @@ void ShellFileSelectHelper::ConvertToFileChooserFileInfoList(
   for (const auto& file : files) {
     chooser_files.push_back(blink::mojom::FileChooserFileInfo::NewNativeFile(
         blink::mojom::NativeFileInfo::New(
-            file.local_path,
-            base::FilePath(file.display_name).AsUTF16Unsafe())));
+            file.local_path, base::FilePath(file.display_name).AsUTF16Unsafe(),
+            std::vector<std::u16string>())));
   }
 
   listener_->FileSelected(std::move(chooser_files), base::FilePath(),
